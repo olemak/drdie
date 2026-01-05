@@ -1,8 +1,9 @@
 use clap::Parser;
-use drdie::{roll_dice, RollOptions};
+use drdie::{RollOptions, roll_dice};
 
 #[derive(Parser)]
 #[command(name = "drdie")]
+#[command(version)]
 #[command(about = "A dice rolling CLI", long_about = None)]
 struct Args {
     /// Dice notation (e.g., "5d6" or "20" for 1d20)

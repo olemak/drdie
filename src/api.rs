@@ -1,11 +1,11 @@
 use axum::{
+    Router,
     extract::Query,
     http::StatusCode,
     response::{IntoResponse, Json},
     routing::get,
-    Router,
 };
-use drdie::{roll_dice, RollOptions};
+use drdie::{RollOptions, roll_dice};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

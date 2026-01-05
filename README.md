@@ -17,51 +17,98 @@ A dice rolling application built in Rust with three deployment targets: CLI, WAS
   - `--json` - JSON output for scripting
 - Shared core logic across all platforms
 
+## Installation
+
+### From source (requires Rust)
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/drdie.git
+cd drdie
+
+# Install globally
+cargo install --path .
+
+# Now you can use it anywhere
+drdie 3d6
+```
+
+### Pre-built binaries (no Rust required)
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/yourusername/drdie/releases):
+- macOS: `drdie-macos`
+- Linux: `drdie-linux`
+- Windows: `drdie-windows.exe`
+
+Then add to your PATH or move to a directory in your PATH:
+```bash
+# macOS/Linux example
+sudo mv drdie-macos /usr/local/bin/drdie
+chmod +x /usr/local/bin/drdie
+```
+
+### Optional: Create a shorter alias
+
+Add to your `~/.zshrc` or `~/.bashrc`:
+```bash
+alias dr='drdie'      # Short and quick
+alias roll='drdie'    # Descriptive
+alias dice='drdie'    # Alternative
+```
+
+Then reload your shell and use:
+```bash
+dr 3d6
+roll 2d20 --drop 1
+```
+
 ## Usage
 
 ### CLI
 
 ```bash
+# Examples below use 'drdie' (installed binary)
+# For development, replace 'drdie' with 'cargo run --'
+
 # Default 1d6
-cargo run
+drdie
 # Output: 4
 
 # Roll 3 six-sided dice
-cargo run -- 3d6
+drdie 3d6
 # Output: 13
 
 # Verbose output shows all rolls
-cargo run -- 3d6 --verbose
+drdie 3d6 --verbose
 # Output:
 # Dice: 3d6
 # All rolls: [4, 5, 2]
 # Total: 11
 
 # JSON output for scripting
-cargo run -- 3d6 --json
+drdie 3d6 --json
 
 # Advantage: roll 2d20, keep highest
-cargo run -- 2d20 --keep 1
+drdie 2d20 --keep 1
 
 # Disadvantage: roll 2d20, drop highest (keep lowest)
-cargo run -- 2d20 --drop 1
+drdie 2d20 --drop 1
 
 # D&D ability score: 4d6, keep highest 3
-cargo run -- 4d6 --keep 3
+drdie 4d6 --keep 3
 
 # Count successes (e.g., Shadowrun, World of Darkness)
-cargo run -- 5d6 --success 5
+drdie 5d6 --success 5
 # Output: 2  (2 dice rolled 5 or 6)
 
 # Count successes and crits
-cargo run -- 10d10 --success 6 --crit 10
+drdie 10d10 --success 6 --crit 10
 # Output: 5 (2 crits)  (5 successes, 2 of which are crits)
 
 # Exploding dice (each max value rolls again)
-cargo run -- 3d6 --explode
+drdie 3d6 --explode
 
 # Shorthand for single die
-cargo run -- 20  # rolls 1d20
+drdie 20  # rolls 1d20
 ```
 
 ### REST API

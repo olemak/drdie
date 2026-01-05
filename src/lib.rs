@@ -8,25 +8,13 @@ pub struct DiceRoll {
     pub notation: String,
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct RollOptions {
     pub explode: bool,
     pub keep: Option<u32>,
     pub drop: Option<u32>,
     pub success: Option<u32>,
     pub crit: Option<u32>,
-}
-
-impl Default for RollOptions {
-    fn default() -> Self {
-        Self {
-            explode: false,
-            keep: None,
-            drop: None,
-            success: None,
-            crit: None,
-        }
-    }
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -59,22 +47,22 @@ impl std::error::Error for DiceError {}
 /// Roll dice with the given notation and options
 pub fn roll_dice(notation: &str, options: &RollOptions) -> Result<RollResult, DiceError> {
     let dice_roll = parse_dice_notation(notation)?;
-    
+
     // Validate options
     if options.keep.is_some() && options.drop.is_some() {
         return Err(DiceError::InvalidOptions(
             "Cannot use both --keep and --drop".to_string(),
         ));
     }
-    
+
     let mut rng = rand::rng();
     let mut rolls = Vec::new();
-    
+
     // Roll initial dice
     for _ in 0..dice_roll.num_dice {
         let roll = rng.random_range(1..=dice_roll.num_sides);
         rolls.push(roll);
-        
+
         // Handle exploding dice
         if options.explode && roll == dice_roll.num_sides {
             let mut explosion_roll = roll;
@@ -84,7 +72,7 @@ pub fn roll_dice(notation: &str, options: &RollOptions) -> Result<RollResult, Di
             }
         }
     }
-    
+
     // Apply keep/drop
     let mut kept_rolls = rolls.clone();
     if let Some(keep_count) = options.keep {
@@ -99,10 +87,10 @@ pub fn roll_dice(notation: &str, options: &RollOptions) -> Result<RollResult, Di
             kept_rolls.clear();
         }
     }
-    
+
     // Calculate total
     let total: u32 = kept_rolls.iter().sum();
-    
+
     // Determine success and crit thresholds
     let (success_threshold, crit_threshold) = match (options.success, options.crit) {
         (Some(s), Some(c)) => (s, c),
@@ -110,11 +98,11 @@ pub fn roll_dice(notation: &str, options: &RollOptions) -> Result<RollResult, Di
         (None, Some(c)) => (c, c), // Crit implies success when no success specified
         (None, None) => (dice_roll.num_sides + 1, dice_roll.num_sides + 1), // No success/crit counting
     };
-    
+
     // Count successes and crits
     let mut successes = 0;
     let mut crits = 0;
-    
+
     if options.success.is_some() || options.crit.is_some() {
         for &roll in &kept_rolls {
             if roll >= success_threshold {
@@ -125,7 +113,7 @@ pub fn roll_dice(notation: &str, options: &RollOptions) -> Result<RollResult, Di
             }
         }
     }
-    
+
     Ok(RollResult {
         rolls,
         kept_rolls,
@@ -140,7 +128,7 @@ pub fn roll_dice(notation: &str, options: &RollOptions) -> Result<RollResult, Di
 pub fn parse_dice_notation(notation: &str) -> Result<DiceRoll, DiceError> {
     let full_pattern = Regex::new(r"^(\d+)d(\d+)$").unwrap();
     let shorthand_pattern = Regex::new(r"^(\d+)$").unwrap();
-    
+
     let (num_dice, num_sides) = if let Some(caps) = full_pattern.captures(notation) {
         (
             caps[1].parse::<u32>().unwrap(),
@@ -153,7 +141,7 @@ pub fn parse_dice_notation(notation: &str) -> Result<DiceRoll, DiceError> {
             "Use format like '5d6' or just '20' for 1d20".to_string(),
         ));
     };
-    
+
     Ok(DiceRoll {
         num_dice,
         num_sides,
