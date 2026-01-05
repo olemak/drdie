@@ -1,5 +1,5 @@
 use clap::Parser;
-use drdie::parse_dice_notation;
+use drdie::{roll_dice, RollOptions};
 
 #[derive(Parser)]
 #[command(name = "drdie")]
@@ -17,26 +17,74 @@ struct Args {
     #[arg(long)]
     keep: Option<u32>,
 
+    /// Drop highest N dice (disadvantage)
+    #[arg(long)]
+    drop: Option<u32>,
+
     /// Success threshold - count dice meeting or exceeding this value
     #[arg(long)]
     success: Option<u32>,
+
+    /// Crit threshold (defaults to max die value if flag present without value)
+    #[arg(long)]
+    crit: Option<u32>,
+
+    /// Output in JSON format
+    #[arg(long)]
+    json: bool,
+
+    /// Verbose output with all details
+    #[arg(long, short)]
+    verbose: bool,
 }
 
 fn main() {
     let args = Args::parse();
 
-    match parse_dice_notation(&args.dice) {
-        Ok(roll) => {
-            println!("Rolling {} dice with {} sides", roll.num_dice, roll.num_sides);
-            
-            if args.explode {
-                println!("  (with exploding dice)");
-            }
-            if let Some(keep) = args.keep {
-                println!("  (keeping highest {})", keep);
-            }
-            if let Some(threshold) = args.success {
-                println!("  (counting successes >= {})", threshold);
+    let options = RollOptions {
+        explode: args.explode,
+        keep: args.keep,
+        drop: args.drop,
+        success: args.success,
+        crit: args.crit,
+    };
+
+    match roll_dice(&args.dice, &options) {
+        Ok(result) => {
+            if args.json {
+                // JSON output
+                match serde_json::to_string_pretty(&result) {
+                    Ok(json) => println!("{}", json),
+                    Err(e) => {
+                        eprintln!("Error serializing to JSON: {}", e);
+                        std::process::exit(1);
+                    }
+                }
+            } else if args.verbose {
+                // Verbose output
+                println!("Dice: {}", result.notation);
+                println!("All rolls: {:?}", result.rolls);
+                if result.rolls != result.kept_rolls {
+                    println!("Kept rolls: {:?}", result.kept_rolls);
+                }
+                println!("Total: {}", result.total);
+                if result.successes > 0 || options.success.is_some() || options.crit.is_some() {
+                    println!("Successes: {}", result.successes);
+                    println!("Crits: {}", result.crits);
+                }
+            } else {
+                // Simple output
+                if result.successes > 0 || options.success.is_some() || options.crit.is_some() {
+                    // If counting successes/crits, show those
+                    if result.crits > 0 {
+                        println!("{} ({} crits)", result.successes, result.crits);
+                    } else {
+                        println!("{}", result.successes);
+                    }
+                } else {
+                    // Otherwise show total
+                    println!("{}", result.total);
+                }
             }
         }
         Err(e) => {

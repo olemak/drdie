@@ -5,56 +5,37 @@ use axum::{
     routing::get,
     Router,
 };
-use drdie::{parse_dice_notation, DiceRoll};
-use serde::{Deserialize, Serialize};
+use drdie::{roll_dice, RollOptions};
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct RollQuery {
     dice: Option<String>,
     explode: Option<bool>,
     keep: Option<u32>,
+    drop: Option<u32>,
     success: Option<u32>,
-}
-
-#[derive(Serialize)]
-struct RollResponse {
-    roll: DiceRoll,
-    options: RollOptions,
-}
-
-#[derive(Serialize)]
-struct RollOptions {
-    explode: bool,
-    keep: Option<u32>,
-    success: Option<u32>,
-}
-
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
+    crit: Option<u32>,
 }
 
 async fn roll_handler(Query(params): Query<RollQuery>) -> impl IntoResponse {
     let notation = params.dice.unwrap_or_else(|| "1d6".to_string());
 
-    match parse_dice_notation(&notation) {
-        Ok(roll) => {
-            let response = RollResponse {
-                roll,
-                options: RollOptions {
-                    explode: params.explode.unwrap_or(false),
-                    keep: params.keep,
-                    success: params.success,
-                },
-            };
-            (StatusCode::OK, Json(response)).into_response()
-        }
-        Err(e) => {
-            let error = ErrorResponse {
-                error: e.to_string(),
-            };
-            (StatusCode::BAD_REQUEST, Json(error)).into_response()
-        }
+    let options = RollOptions {
+        explode: params.explode.unwrap_or(false),
+        keep: params.keep,
+        drop: params.drop,
+        success: params.success,
+        crit: params.crit,
+    };
+
+    match roll_dice(&notation, &options) {
+        Ok(result) => (StatusCode::OK, Json(result)).into_response(),
+        Err(e) => (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": e.to_string() })),
+        )
+            .into_response(),
     }
 }
 

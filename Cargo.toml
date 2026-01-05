@@ -17,22 +17,23 @@ required-features = []
 [[bin]]
 name = "drdie-api"
 path = "src/api.rs"
-required-features = ["serde"]
+required-features = ["api"]
 
 [dependencies]
 axum = { version = "0.8.8", optional = true }
 clap = { version = "4.5.54", features = ["derive"] }
+rand = "0.9.2"
 regex = "1.12.2"
-serde = { version = "1.0.228", features = ["derive"], optional = true }
-serde_json = { version = "1.0.148", optional = true }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.148"
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
 tokio = { version = "1.49.0", features = ["full"], optional = true }
 wasm-bindgen = { version = "0.2.106", optional = true }
 
 [features]
 default = []
-api = ["serde", "serde_json", "axum", "tokio"]
-wasm = ["wasm-bindgen", "serde", "serde-wasm-bindgen"]
+api = ["axum", "tokio"]
+wasm = ["wasm-bindgen", "serde-wasm-bindgen"]
 
 [profile.release]
 opt-level = "z"
