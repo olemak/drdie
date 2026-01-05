@@ -1,6 +1,9 @@
 use rand::Rng;
 use regex::Regex;
 
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DiceRoll {
     pub num_dice: u32,

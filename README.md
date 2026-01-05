@@ -1,6 +1,20 @@
 # drdie
 
-A dice rolling application built in Rust with three deployment targets: CLI, WASM, and REST API.
+A dice rolling application built in Rust with three deployment targets: CLI,
+WASM, and REST API.
+
+> **Note:** This project demonstrates sharing Rust code across multiple
+> platforms (CLI, API, WASM). The WASM build serves as a template for Rust +
+> WebAssembly projects. For production browser-only dice rolling, pure
+> JavaScript is likely more practical.
+
+## Use Cases
+
+- **CLI Tool**: Fast dice rolling from the terminal for RPG sessions
+- **REST API**: Integrate dice rolling into web apps, Discord bots, etc.
+- **WASM Template**: Example of sharing Rust logic across CLI, server, and
+  browser
+- **Learning Resource**: See how to structure a multi-platform Rust project
 
 ## Features
 
@@ -20,6 +34,7 @@ A dice rolling application built in Rust with three deployment targets: CLI, WAS
 ## Installation
 
 ### From source (requires Rust)
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/drdie.git
@@ -34,12 +49,15 @@ drdie 3d6
 
 ### Pre-built binaries (no Rust required)
 
-Download the latest release for your platform from [GitHub Releases](https://github.com/yourusername/drdie/releases):
+Download the latest release for your platform from
+[GitHub Releases](https://github.com/yourusername/drdie/releases):
+
 - macOS: `drdie-macos`
 - Linux: `drdie-linux`
 - Windows: `drdie-windows.exe`
 
 Then add to your PATH or move to a directory in your PATH:
+
 ```bash
 # macOS/Linux example
 sudo mv drdie-macos /usr/local/bin/drdie
@@ -49,6 +67,7 @@ chmod +x /usr/local/bin/drdie
 ### Optional: Create a shorter alias
 
 Add to your `~/.zshrc` or `~/.bashrc`:
+
 ```bash
 alias dr='drdie'      # Short and quick
 alias roll='drdie'    # Descriptive
@@ -56,6 +75,7 @@ alias dice='drdie'    # Alternative
 ```
 
 Then reload your shell and use:
+
 ```bash
 dr 3d6
 roll 2d20 --drop 1
@@ -136,21 +156,66 @@ curl "http://127.0.0.1:3000/health"
 # }
 ```
 
-### WASM
+### WASM (Browser/Node.js)
 
-Build for WebAssembly:
+> **Template Project**: The WASM build demonstrates code sharing across
+> platforms. For simple browser dice rolling, consider using native JavaScript
+> for better performance and smaller bundle size. This is ideal as a starting
+> point for more complex Rust+WASM projects.
+
+#### Build and test locally
 
 ```bash
-# Install wasm-pack if you haven't
+# Install wasm-pack
 cargo install wasm-pack
 
-# Build WASM package
+# Build WASM package for web
 wasm-pack build --target web --features wasm
 
-# Use in JavaScript
-import init, { roll_dice } from './pkg/drdie.js';
+# Serve the example (choose one):
+deno run --allow-net --allow-read https://deno.land/std/http/file_server.ts  # Deno
+python3 -m http.server 8000          # Python (usually pre-installed)
+npx serve .                           # Node.js
+php -S localhost:8000                 # PHP
+ruby -run -e httpd . -p 8000          # Ruby
+
+# Open http://localhost:8000/example.html
+```
+
+#### Use in JavaScript/TypeScript
+
+```javascript
+import init, { roll_dice } from "drdie";
+
 await init();
-const result = roll_dice('3d6');
+
+// Simple roll
+const result = roll_dice("3d6", null, null, null, null, null);
+console.log(result);
+// Output: { rolls: [4, 5, 2], kept_rolls: [4, 5, 2], total: 11, ... }
+
+// With options
+const advantageRoll = roll_dice("2d20", false, 1, null, null, null);
+const successRoll = roll_dice("5d6", false, null, null, 5, 6);
+```
+
+#### Publish to npm
+
+```bash
+# Build for npm
+wasm-pack build --target bundler --features wasm
+
+# Publish (first time)
+wasm-pack login
+wasm-pack publish
+```
+
+Users can then install:
+
+```bash
+npm install drdie
+# or
+yarn add drdie
 ```
 
 ## Architecture
@@ -163,7 +228,9 @@ src/
 └── wasm.rs   # WASM entry point (uses wasm-bindgen)
 ```
 
-The core logic in `lib.rs` is pure and reusable across all three platforms. Each entry point is a thin wrapper that handles input/output for its specific context.
+The core logic in `lib.rs` is pure and reusable across all three platforms. Each
+entry point is a thin wrapper that handles input/output for its specific
+context.
 
 ## Development
 

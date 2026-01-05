@@ -3,6 +3,12 @@ name = "drdie"
 version = "0.1.0"
 edition = "2024"
 default-run = "drdie"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT OR Apache-2.0"
+description = "A versatile dice rolling library and CLI for RPGs"
+repository = "https://github.com/yourusername/drdie"
+keywords = ["dice", "rpg", "gaming", "random", "cli"]
+categories = ["command-line-utilities", "games", "wasm"]
 
 [lib]
 name = "drdie"
@@ -22,6 +28,7 @@ required-features = ["api"]
 [dependencies]
 axum = { version = "0.8.8", optional = true }
 clap = { version = "4.5.54", features = ["derive"] }
+getrandom = { version = "0.3", features = ["wasm_js"] }
 rand = "0.9.2"
 regex = "1.12.2"
 serde = { version = "1.0.228", features = ["derive"] }

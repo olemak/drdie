@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>drdie WASM Example</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        h3 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .input-group {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        input[type="number"] {
+            padding: 8px;
+            font-size: 14px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            width: 80px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button:active {
+            background: #1e40af;
+        }
+        .option {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        small {
+            display: block;
+            color: #666;
+            margin-top: 3px;
+            font-size: 13px;
+        }
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        pre {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>drdie - Dice Roller</h1>
+    
+    <div class="input-group">
+        <input type="text" id="notation" value="3d6" placeholder="e.g., 3d6, 2d20, 20">
+        <button onclick="rollDice()">Roll</button>
+    </div>
+    
+    <div class="input-group">
+        <h3>Modifiers</h3>
+        <div class="option">
+            <label><input type="checkbox" id="explode"> Exploding Dice</label>
+            <small>Roll an extra die for any roll with maximum value</small>
+        </div>
+        <div class="option">
+            <label>Keep Highest: <input type="number" id="keep" min="1" placeholder=""></label>
+            <small>Keep only the N highest dice (advantage)</small>
+        </div>
+        <div class="option">
+            <label>Drop Highest: <input type="number" id="drop" min="1" placeholder=""></label>
+            <small>Discard the N highest dice (disadvantage)</small>
+        </div>
+        <div class="option">
+            <label>Success Threshold: <input type="number" id="success" min="1" placeholder=""></label>
+            <small>Count dice that rolled this value or higher</small>
+        </div>
+        <div class="option">
+            <label>Crit Threshold: <input type="number" id="crit" min="1" placeholder=""></label>
+            <small>Count critical successes at this value or higher</small>
+        </div>
+    </div>
+    
+    <pre id="result"></pre>
+
+    <script type="module">
+        import init, { roll_dice } from './pkg/drdie.js';
+
+        await init();
+
+        window.rollDice = function() {
+            const notation = document.getElementById('notation').value;
+            const explode = document.getElementById('explode').checked;
+            const keep = parseInt(document.getElementById('keep').value) || null;
+            const drop = parseInt(document.getElementById('drop').value) || null;
+            const success = parseInt(document.getElementById('success').value) || null;
+            const crit = parseInt(document.getElementById('crit').value) || null;
+
+            try {
+                const result = roll_dice(notation, explode, keep, drop, success, crit);
+                document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+            } catch (e) {
+                document.getElementById('result').textContent = 'Error: ' + e;
+            }
+        };
+    </script>
+</body>
+</html>
