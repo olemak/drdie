@@ -37,7 +37,7 @@ WASM, and REST API.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/drdie.git
+git clone https://github.com/olemak/drdie.git
 cd drdie
 
 # Install globally
@@ -50,7 +50,7 @@ drdie 3d6
 ### Pre-built binaries (no Rust required)
 
 Download the latest release for your platform from
-[GitHub Releases](https://github.com/yourusername/drdie/releases):
+[GitHub Releases](https://github.com/olemak/drdie/releases):
 
 - macOS: `drdie-macos`
 - Linux: `drdie-linux`
@@ -69,9 +69,8 @@ chmod +x /usr/local/bin/drdie
 Add to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-alias dr='drdie'      # Short and quick
+alias dr='drdie'      # Short
 alias roll='drdie'    # Descriptive
-alias dice='drdie'    # Alternative
 ```
 
 Then reload your shell and use:
@@ -85,50 +84,14 @@ roll 2d20 --drop 1
 
 ### CLI
 
+See installation section above for basic usage. Examples:
+
 ```bash
-# Examples below use 'drdie' (installed binary)
-# For development, replace 'drdie' with 'cargo run --'
-
-# Default 1d6
-drdie
-# Output: 4
-
-# Roll 3 six-sided dice
-drdie 3d6
-# Output: 13
-
-# Verbose output shows all rolls
-drdie 3d6 --verbose
-# Output:
-# Dice: 3d6
-# All rolls: [4, 5, 2]
-# Total: 11
-
-# JSON output for scripting
-drdie 3d6 --json
-
-# Advantage: roll 2d20, keep highest
-drdie 2d20 --keep 1
-
-# Disadvantage: roll 2d20, drop highest (keep lowest)
-drdie 2d20 --drop 1
-
-# D&D ability score: 4d6, keep highest 3
-drdie 4d6 --keep 3
-
-# Count successes (e.g., Shadowrun, World of Darkness)
-drdie 5d6 --success 5
-# Output: 2  (2 dice rolled 5 or 6)
-
-# Count successes and crits
-drdie 10d10 --success 6 --crit 10
-# Output: 5 (2 crits)  (5 successes, 2 of which are crits)
-
-# Exploding dice (each max value rolls again)
-drdie 3d6 --explode
-
-# Shorthand for single die
-drdie 20  # rolls 1d20
+drdie 3d6                    # Simple roll
+drdie 4d6 --keep 3           # D&D ability score
+drdie 2d20 --drop 1          # Disadvantage
+drdie 5d6 --success 5        # Count successes
+drdie --help                 # See all options
 ```
 
 ### REST API
@@ -158,21 +121,22 @@ curl "http://127.0.0.1:3000/health"
 
 ### WASM (Browser/Node.js)
 
-> **Template Project**: The WASM build demonstrates code sharing across
-> platforms. For simple browser dice rolling, consider using native JavaScript
-> for better performance and smaller bundle size. This is ideal as a starting
-> point for more complex Rust+WASM projects.
+Rust can compile to WASM, and thereby run in a web browser. There is no benefit
+to doing this for simple functionality, such as this die roller, but for more
+complex applications this repo could serve as an example of how to create WASM
+bindings, so that users can use a web interface to interact with a Rust
+application running locally in the browser.
 
 #### Build and test locally
 
 ```bash
-# Install wasm-pack
+# 1. Install wasm-pack
 cargo install wasm-pack
 
-# Build WASM package for web
+# 2. Build WASM package for web
 wasm-pack build --target web --features wasm
 
-# Serve the example (choose one):
+# 3. Serve the example (choose one):
 deno run --allow-net --allow-read https://deno.land/std/http/file_server.ts  # Deno
 python3 -m http.server 8000          # Python (usually pre-installed)
 npx serve .                           # Node.js
@@ -213,10 +177,13 @@ wasm-pack publish
 Users can then install:
 
 ```bash
-npm install drdie
+npm install [your-package]
 # or
-yarn add drdie
+yarn add [your-package]
 ```
+
+Note: This package (drdie) has not been published to NPM etc, because it adds
+little value.
 
 ## Architecture
 
@@ -244,6 +211,6 @@ cargo check
 # Format code
 cargo fmt
 
-# Run clippy
+# Run clippy (Rust linter)
 cargo clippy
 ```
