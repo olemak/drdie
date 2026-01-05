@@ -1,26 +1,47 @@
-use regex::Regex;
-use std::env;
+use clap::Parser;
+use drdie::parse_dice_notation;
+
+#[derive(Parser)]
+#[command(name = "drdie")]
+#[command(about = "A dice rolling CLI", long_about = None)]
+struct Args {
+    /// Dice notation (e.g., "5d6" or "20" for 1d20)
+    #[arg(default_value = "1d6")]
+    dice: String,
+
+    /// Exploding dice - reroll maximum values
+    #[arg(long)]
+    explode: bool,
+
+    /// Keep highest N dice
+    #[arg(long)]
+    keep: Option<u32>,
+
+    /// Success threshold - count dice meeting or exceeding this value
+    #[arg(long)]
+    success: Option<u32>,
+}
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args = Args::parse();
 
-    let dies = if args.len() < 2 {
-        "1d6".to_string()
-    } else {
-        args[1].clone()
-    };
-
-    let full_pattern = Regex::new(r"^(\d+)d(\d+)$").unwrap();
-    let shorthand_pattern = Regex::new(r"^(\d+)$").unwrap();
-    
-    let (num_dice, num_sides) = if let Some(caps) = full_pattern.captures(&dies) {
-        (caps[1].parse::<u32>().unwrap(), caps[2].parse::<u32>().unwrap())
-    } else if let Some(caps) = shorthand_pattern.captures(&dies) {
-        (1, caps[1].parse::<u32>().unwrap())
-    } else {
-        eprintln!("Invalid dice notation. Use format like '5d6' or just '20' for 1d20");
-        std::process::exit(1);
-    };
-    
-    println!("Rolling {} dice with {} sides", num_dice, num_sides);
+    match parse_dice_notation(&args.dice) {
+        Ok(roll) => {
+            println!("Rolling {} dice with {} sides", roll.num_dice, roll.num_sides);
+            
+            if args.explode {
+                println!("  (with exploding dice)");
+            }
+            if let Some(keep) = args.keep {
+                println!("  (keeping highest {})", keep);
+            }
+            if let Some(threshold) = args.success {
+                println!("  (counting successes >= {})", threshold);
+            }
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    }
 }

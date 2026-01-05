@@ -2,6 +2,38 @@
 name = "drdie"
 version = "0.1.0"
 edition = "2024"
+default-run = "drdie"
+
+[lib]
+name = "drdie"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "drdie"
+path = "src/main.rs"
+required-features = []
+
+[[bin]]
+name = "drdie-api"
+path = "src/api.rs"
+required-features = ["serde"]
 
 [dependencies]
+axum = { version = "0.8.8", optional = true }
+clap = { version = "4.5.54", features = ["derive"] }
 regex = "1.12.2"
+serde = { version = "1.0.228", features = ["derive"], optional = true }
+serde_json = { version = "1.0.148", optional = true }
+serde-wasm-bindgen = { version = "0.6.5", optional = true }
+tokio = { version = "1.49.0", features = ["full"], optional = true }
+wasm-bindgen = { version = "0.2.106", optional = true }
+
+[features]
+default = []
+api = ["serde", "serde_json", "axum", "tokio"]
+wasm = ["wasm-bindgen", "serde", "serde-wasm-bindgen"]
+
+[profile.release]
+opt-level = "z"
+lto = true
